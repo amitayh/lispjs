@@ -4,16 +4,13 @@ function evaluate(expr, env) {
   }
   if (Array.isArray(expr)) {
     var func = expr[0];
-    if (func === 'define') {
-      return define(expr, env);
+    switch (func) {
+      case 'define': return [null, define(expr, env)];
+      case 'func': return [closure(expr[1], expr[2]), env];
+      case 'if': return [branch(expr[1], expr[2], expr[3], env), env];
+      case 'quote': return [expr[1], env];
+      default: return [invoke(func, expr.slice(1), env), env];
     }
-    if (func === 'func') {
-      return closure(expr[1], expr[2], env);
-    }
-    if (func === 'if') {
-      return branch(expr[1], expr[2], expr[3], env);
-    }
-    return invoke(func, expr.slice(1), env);
   }
   return [expr, env];
 }
@@ -38,34 +35,28 @@ function define(expr, env) {
   var name = expr[1];
   var newEnv = copy(env);
   newEnv[name] = getResult(expr[2], env);
-  return [null, newEnv];
+  return newEnv;
 }
 
-function closure(argsList, body, env) {
-  var result = function () {
-    var closureEnv = copy(this);
-    merge(closureEnv, env);
+function closure(argsList, body) {
+  return function () {
+    var env = copy(this);
     for (var i = 0; i < arguments.length; i++) {
-      closureEnv[argsList[i]] = arguments[i];
+      env[argsList[i]] = arguments[i];
     }
-    return getResult(body, closureEnv);
+    return getResult(body, env);
   };
-  return [result, env];
 }
 
 function branch(cond, then, otherwise, env) {
-  var result = getResult(cond, env) ?
-    getResult(then, env) :
-    getResult(otherwise, env);
-  return [result, env];
+  return getResult(cond, env) ? getResult(then, env) : getResult(otherwise, env);
 }
 
 function invoke(func, args, env) {
   var evaluatedArgs = args.map(function (arg) {
     return getResult(arg, env);
   });
-  var result = env[func].apply(env, evaluatedArgs);
-  return [result, env];
+  return env[func].apply(env, evaluatedArgs);
 }
 
 function copy(obj) {
@@ -76,14 +67,6 @@ function copy(obj) {
     }
   }
   return result;
-}
-
-function merge(target, source) {
-  for (var key in source) {
-    if (source.hasOwnProperty(key)) {
-      target[key] = source[key];
-    }
-  }
 }
 
 module.exports = {

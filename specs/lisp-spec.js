@@ -88,12 +88,12 @@ describe('lispjs', function () {
     });
   });
 
-  it('should evaluate multiple blocks of code', function () {
-    var prog = [
-      ['define', 'foo', 'bar'],
-      'foo'
-    ];
-    assert.equal(lisp.getResultMulti(prog, {}), 'bar');
+  describe('quote', function () {
+    it('should return passed value without evaluation', function () {
+      var env = {foo: constantly('bar')};
+      var expr = ['quote', ['foo']];
+      assert.deepEqual(lisp.getResult(expr, env), ['foo']);
+    });
   });
 
   describe('closures', function () {
@@ -153,6 +153,14 @@ describe('lispjs', function () {
       assert.equal(lisp.getResult(['fib', 4], fibEnv), 5);
       assert.equal(lisp.getResult(['fib', 5], fibEnv), 8);
     });
+  });
+
+  it('should evaluate multiple blocks of code', function () {
+    var prog = [
+      ['define', 'foo', 'bar'],
+      'foo'
+    ];
+    assert.equal(lisp.getResultMulti(prog, {}), 'bar');
   });
 
 });
