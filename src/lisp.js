@@ -71,10 +71,12 @@ function copy(obj) {
 
 var defaultEnv = {
   '<': function (a, b) { return a < b; },
-  '>': function (a, b) { return a < b; },
+  '>': function (a, b) { return a > b; },
   '=': function (a, b) { return a == b; },
   '+': function (a, b) { return a + b; },
   '-': function (a, b) { return a - b; },
+  '*': function (a, b) { return a * b; },
+  '/': function (a, b) { return a / b; },
   car: function (xs) { return xs[0]; },
   cdr: function (xs) { return xs.slice(1); },
   cons: function (x, xs) { return [x].concat(xs); },

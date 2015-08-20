@@ -131,14 +131,12 @@ describe('lispjs', function () {
   });
 
   describe('programs tests', function () {
-    it('should be able to calculate fibonacci recursively', function () {
+    it('should calculate fibonacci recursively', function () {
       var prog =
         ['define', 'fib',
           ['lambda', ['n'],
             ['if', ['<', 'n', 2],
-              // n < 2, return 1
               1,
-              // return fib(n-1) + fib(n-2)
               ['+',
                 ['fib', ['-', 'n', 1]],
                 ['fib', ['-', 'n', 2]]]]]];
@@ -153,7 +151,25 @@ describe('lispjs', function () {
       assert.equal(lisp.getResult(['fib', 5], fibEnv), 8);
     });
 
-    it('should be able to define map function with default env', function () {
+    it('should calculate factorial recursively', function () {
+      var prog =
+        ['define', 'fact',
+          ['lambda', ['n'],
+            ['if', ['<', 'n', 2],
+              1,
+              ['*', 'n', ['fact', ['-', 'n', 1]]]]]];
+
+      var factEnv = lisp.evaluate(prog, lisp.defaultEnv)[1];
+
+      assert.equal(lisp.getResult(['fact', 0], factEnv), 1);
+      assert.equal(lisp.getResult(['fact', 1], factEnv), 1);
+      assert.equal(lisp.getResult(['fact', 2], factEnv), 2);
+      assert.equal(lisp.getResult(['fact', 3], factEnv), 6);
+      assert.equal(lisp.getResult(['fact', 4], factEnv), 24);
+      assert.equal(lisp.getResult(['fact', 5], factEnv), 120);
+    });
+
+    it('should support higher order functions (map)', function () {
       var prog = [
         // Define map function
         ['define', 'map',
