@@ -96,16 +96,16 @@ describe('lispjs', function () {
     });
   });
 
-  describe('closures', function () {
+  describe('lambdas', function () {
     it('should define simple function without arguments', function () {
-      var expr = ['define', 'foo', ['func', [], 'bar']];
+      var expr = ['define', 'foo', ['lambda', [], 'bar']];
       var result = lisp.evaluate(expr, {});
       assert.equal(lisp.getResult(['foo'], result[1]), 'bar');
     });
 
     it('should bind arguments when calling a function', function () {
       var prog = [
-        ['define', 'foo', ['func', ['arg'], 'arg']],
+        ['define', 'foo', ['lambda', ['arg'], 'arg']],
         ['foo', 'bar']
       ];
       assert.equal(lisp.getResultMulti(prog, {}), 'bar');
@@ -114,7 +114,7 @@ describe('lispjs', function () {
     it('should support lexical scope', function () {
       var prog = [
         ['define', 'foo', 'bar'],
-        ['define', 'bar', ['func', [], 'foo']],
+        ['define', 'bar', ['lambda', [], 'foo']],
         ['bar']
       ];
       assert.equal(lisp.getResultMulti(prog, {}), 'bar');
@@ -123,7 +123,7 @@ describe('lispjs', function () {
     it('should give local scope higher priority', function () {
       var prog = [
         ['define', 'foo', 'bar'],
-        ['define', 'bar', ['func', ['foo'], 'foo']],
+        ['define', 'bar', ['lambda', ['foo'], 'foo']],
         ['bar', 'baz']
       ];
       assert.equal(lisp.getResultMulti(prog, {}), 'baz');
@@ -134,7 +134,7 @@ describe('lispjs', function () {
     it('should be able to calculate fibonacci recursively', function () {
       var prog =
         ['define', 'fib',
-          ['func', ['n'],
+          ['lambda', ['n'],
             ['if', ['<', 'n', 2],
               // n < 2, return 1
               1,
@@ -157,7 +157,7 @@ describe('lispjs', function () {
       var prog = [
         // Define map function
         ['define', 'map',
-          ['func', ['f', 'coll'],
+          ['lambda', ['f', 'coll'],
             ['if', ['empty', 'coll'],
               'coll',
               ['cons',
@@ -166,7 +166,7 @@ describe('lispjs', function () {
 
         // Define unary increment function
         ['define', 'inc',
-          ['func', ['num'],
+          ['lambda', ['num'],
             ['+', 'num', 1]]],
 
         // Define some collection

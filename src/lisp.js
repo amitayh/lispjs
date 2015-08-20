@@ -6,7 +6,7 @@ function evaluate(expr, env) {
     var func = expr[0];
     switch (func) {
       case 'define': return [null, define(expr, env)];
-      case 'func': return [closure(expr[1], expr[2]), env];
+      case 'lambda': return [lambda(expr[1], expr[2]), env];
       case 'if': return [branch(expr[1], expr[2], expr[3], env), env];
       case 'quote': return [expr[1], env];
       default: return [invoke(func, expr.slice(1), env), env];
@@ -38,7 +38,7 @@ function define(expr, env) {
   return newEnv;
 }
 
-function closure(argsList, body) {
+function lambda(argsList, body) {
   return function () {
     var env = copy(this);
     for (var i = 0; i < arguments.length; i++) {
