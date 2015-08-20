@@ -4,7 +4,6 @@
   "description": "Simple Lisp implementation in JavaScript",
   "main": "index.js",
   "devDependencies": {
-    "expect": "^1.9.0",
     "jasmine": "^2.3.2",
     "mocha": "^2.2.5"
   },
