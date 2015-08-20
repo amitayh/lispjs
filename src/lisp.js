@@ -69,8 +69,21 @@ function copy(obj) {
   return result;
 }
 
+var defaultEnv = {
+  '<': function (a, b) { return a < b; },
+  '>': function (a, b) { return a < b; },
+  '=': function (a, b) { return a == b; },
+  '+': function (a, b) { return a + b; },
+  '-': function (a, b) { return a - b; },
+  car: function (xs) { return xs[0]; },
+  cdr: function (xs) { return xs.slice(1); },
+  cons: function (x, xs) { return [x].concat(xs); },
+  empty: function (xs) { return xs.length == 0; }
+};
+
 module.exports = {
   evaluate: evaluate,
   getResult: getResult,
-  getResultMulti: getResultMulti
+  getResultMulti: getResultMulti,
+  defaultEnv: defaultEnv
 };

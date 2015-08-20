@@ -128,23 +128,22 @@ describe('lispjs', function () {
       ];
       assert.equal(lisp.getResultMulti(prog, {}), 'baz');
     });
+  });
 
-    it('should allow recursion', function () {
-      var env = {
-        '<': function (a, b) { return a < b; },
-        '+': function (a, b) { return a + b; },
-        '-': function (a, b) { return a - b; }
-      };
+  describe('programs tests', function () {
+    it('should be able to calculate fibonacci recursively', function () {
       var prog =
         ['define', 'fib',
           ['func', ['n'],
             ['if', ['<', 'n', 2],
+              // n < 2, return 1
               1,
+              // return fib(n-1) + fib(n-2)
               ['+',
                 ['fib', ['-', 'n', 1]],
                 ['fib', ['-', 'n', 2]]]]]];
 
-      var fibEnv = lisp.evaluate(prog, env)[1];
+      var fibEnv = lisp.evaluate(prog, lisp.defaultEnv)[1];
 
       assert.equal(lisp.getResult(['fib', 0], fibEnv), 1);
       assert.equal(lisp.getResult(['fib', 1], fibEnv), 1);
@@ -153,14 +152,32 @@ describe('lispjs', function () {
       assert.equal(lisp.getResult(['fib', 4], fibEnv), 5);
       assert.equal(lisp.getResult(['fib', 5], fibEnv), 8);
     });
-  });
 
-  it('should evaluate multiple blocks of code', function () {
-    var prog = [
-      ['define', 'foo', 'bar'],
-      'foo'
-    ];
-    assert.equal(lisp.getResultMulti(prog, {}), 'bar');
+    it('should be able to define map function with default env', function () {
+      var prog = [
+        // Define map function
+        ['define', 'map',
+          ['func', ['f', 'coll'],
+            ['if', ['empty', 'coll'],
+              'coll',
+              ['cons',
+                ['f', ['car', 'coll']],
+                ['map', 'f', ['cdr', 'coll']]]]]],
+
+        // Define unary increment function
+        ['define', 'inc',
+          ['func', ['num'],
+            ['+', 'num', 1]]],
+
+        // Define some collection
+        ['define', 'coll', ['quote', [1, 2, 3]]],
+
+        // Map collection with 'inc'
+        ['map', 'inc', 'coll']
+      ];
+
+      assert.deepEqual(lisp.getResultMulti(prog, lisp.defaultEnv), [2, 3, 4]);
+    });
   });
 
 });
