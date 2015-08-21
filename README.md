@@ -80,4 +80,23 @@ var map = [
   ['map', 'inc', 'coll']
 ];
 console.log(lisp.run(map)); // Prints [2, 3, 4]
+
+// Contains (checks if element exists in collection)
+var contains = [
+  // Define contains function
+  ['define', 'contains',
+    ['lambda', ['el', 'coll'],
+      ['if', ['empty', 'coll'],
+        false,
+        ['or',
+          ['=', 'el', ['car', 'coll']],
+          ['contains', 'el', ['cdr', 'coll']]]]]],
+
+  // Define some collection
+  ['define', 'coll', ['quote', [1, 2, 3]]],
+
+  // Check if collection contains 2
+  ['contains', 2, 'coll']
+];
+console.log(lisp.run(contains)); // Prints true
 ```

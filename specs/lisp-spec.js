@@ -143,7 +143,7 @@ describe('lispjs', function () {
 
   describe('programs tests', function () {
     it('should calculate fibonacci recursively', function () {
-      var prog =
+      var fib =
         ['define', 'fib',
           ['lambda', ['n'],
             ['if', ['<', 'n', 2],
@@ -152,7 +152,7 @@ describe('lispjs', function () {
                 ['fib', ['-', 'n', 1]],
                 ['fib', ['-', 'n', 2]]]]]];
 
-      var fibEnv = lisp.evaluate(prog, lisp.defaultEnv)[1];
+      var fibEnv = lisp.evaluate(fib, lisp.defaultEnv)[1];
 
       var tests = [
         {input: 0, output: 1},
@@ -168,14 +168,14 @@ describe('lispjs', function () {
     });
 
     it('should calculate factorial recursively', function () {
-      var prog =
+      var fact =
         ['define', 'fact',
           ['lambda', ['n'],
             ['if', ['<', 'n', 2],
               1,
               ['*', 'n', ['fact', ['-', 'n', 1]]]]]];
 
-      var factEnv = lisp.evaluate(prog, lisp.defaultEnv)[1];
+      var factEnv = lisp.evaluate(fact, lisp.defaultEnv)[1];
 
       var tests = [
         {input: 0, output: 1},
@@ -214,6 +214,22 @@ describe('lispjs', function () {
       ];
 
       assert.deepEqual(lisp.run(prog), [2, 3, 4]);
+    });
+
+    it('should search for element in collection', function () {
+      var contains =
+        ['define', 'contains',
+          ['lambda', ['el', 'coll'],
+            ['if', ['empty', 'coll'],
+              false,
+              ['or',
+                ['=', 'el', ['car', 'coll']],
+                ['contains', 'el', ['cdr', 'coll']]]]]];
+
+      var containsEnv = lisp.evaluate(contains, lisp.defaultEnv)[1];
+
+      assert.equal(lisp.getResult(['contains', 0, ['quote', [1, 2, 3]]], containsEnv), false);
+      assert.equal(lisp.getResult(['contains', 2, ['quote', [1, 2, 3]]], containsEnv), true);
     });
   });
 

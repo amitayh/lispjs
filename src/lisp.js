@@ -1,3 +1,7 @@
+/**
+ * Evaluate an expression with given environment.
+ * Returns a tuple [result, env] - with evaluation result and new environment
+ */
 function evaluate(expr, env) {
   if (isBound(expr, env)) {
     return [env[expr], env];
@@ -14,10 +18,19 @@ function evaluate(expr, env) {
   return [expr, env];
 }
 
+/**
+ * Evaluate an expression with given environment.
+ * Returns just the evaluation result
+ */
 function getResult(expr, env) {
   return evaluate(expr, env)[0];
 }
 
+/**
+ * Run a program in with default environment.
+ * A program is a list of expressions.
+ * Returns the evaluation result of the last expression
+ */
 function run(prog) {
   var result = [null, defaultEnv];
   prog.forEach(function (expr) {
@@ -76,6 +89,9 @@ var defaultEnv = {
   '-': function (a, b) { return a - b; },
   '*': function (a, b) { return a * b; },
   '/': function (a, b) { return a / b; },
+  and: function (a, b) { return a && b; },
+  or: function (a, b) { return a || b; },
+  not: function (expr) { return !expr; },
   car: function (xs) { return xs[0]; },
   cdr: function (xs) { return xs.slice(1); },
   cons: function (x, xs) { return [x].concat(xs); },
