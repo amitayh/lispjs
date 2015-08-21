@@ -19,10 +19,6 @@ li {
     border-bottom: 1px solid #ccc;
     margin-bottom: 1em;
 }
-.result-null::after {
-    content: 'null';
-    color: #ccc;
-}
 .error {
     color: #cc0000;
 }

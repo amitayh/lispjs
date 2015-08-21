@@ -9,16 +9,9 @@ var ResultItem = React.createClass({
     return (
       <li className="result-item">
         <pre className="result-expr">{result.expr}</pre>
-        <pre className={this.getValueClass()}>{result.value}</pre>
+        <pre>{JSON.stringify(result.value)}</pre>
       </li>
     );
-  },
-  getValueClass: function () {
-    var classes = ['resultValue'];
-    if (this.props.result.value === null) {
-      classes.push('result-null');
-    }
-    return classes.join(' ');
   }
 });
 
@@ -39,13 +32,11 @@ var InputBox = React.createClass({
     );
   },
   onExprChange: function (e) {
-    var expr = e.target.value;
-    if (expr.trim() !== '') {
-      this.setState({expr: expr});
-    }
+    this.setState({expr: e.target.value});
   },
   onKeyDown: function (e) {
     if (e.ctrlKey && e.keyCode == enterKeyCode) {
+      e.preventDefault();
       this.onEvalClick();
     }
   },
