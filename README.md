@@ -2,6 +2,26 @@
 
 Simple Lisp implementation in JavaScript
 
+## Installation
+
+```
+$ git clone https://github.com/amitayh/lispjs
+$ cd lispjs
+$ npm install
+```
+
+## Running tests
+
+```
+$ npm test
+```
+
+## Running a REPL (pretty lame... :sweat:)
+
+```
+$ npm run repl
+```
+
 ## Example programs
 
 ```javascript
