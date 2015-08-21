@@ -112,7 +112,7 @@ var Repl = React.createClass({
     }
   },
   onClear: function () {
-    this.setState({results: []});
+    this.setState({results: [], error: null});
   },
   onError: function (error) {
     this.setState({error: error});
