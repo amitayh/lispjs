@@ -8,7 +8,7 @@ function evaluate(expr, env) {
   }
   if (Array.isArray(expr)) {
     switch (expr[0]) {
-      case 'define': return [null, define(expr, env)];
+      case 'define': return [null, define(expr[1], expr[2], env)];
       case 'lambda': return [lambda(expr[1], expr[2]), env];
       case 'if': return [branch(expr[1], expr[2], expr[3], env), env];
       case 'quote': return [expr[1], env];
@@ -43,10 +43,9 @@ function isBound(expr, env) {
   return (typeof expr === 'string' && env[expr] !== undefined);
 }
 
-function define(expr, env) {
-  var name = expr[1];
+function define(name, expr, env) {
   var newEnv = copy(env);
-  newEnv[name] = getResult(expr[2], env);
+  newEnv[name] = getResult(expr, env);
   return newEnv;
 }
 
