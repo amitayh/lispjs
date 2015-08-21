@@ -119,7 +119,7 @@ describe('lispjs', function () {
         ['define', 'foo', ['lambda', ['arg'], 'arg']],
         ['foo', 'bar']
       ];
-      assert.equal(lisp.getResultMulti(prog, {}), 'bar');
+      assert.equal(lisp.run(prog), 'bar');
     });
 
     it('should support lexical scope', function () {
@@ -128,7 +128,7 @@ describe('lispjs', function () {
         ['define', 'bar', ['lambda', [], 'foo']],
         ['bar']
       ];
-      assert.equal(lisp.getResultMulti(prog, {}), 'bar');
+      assert.equal(lisp.run(prog), 'bar');
     });
 
     it('should give local scope higher priority', function () {
@@ -137,7 +137,7 @@ describe('lispjs', function () {
         ['define', 'bar', ['lambda', ['foo'], 'foo']],
         ['bar', 'baz']
       ];
-      assert.equal(lisp.getResultMulti(prog, {}), 'baz');
+      assert.equal(lisp.run(prog), 'baz');
     });
   });
 
@@ -213,7 +213,7 @@ describe('lispjs', function () {
         ['map', 'inc', 'coll']
       ];
 
-      assert.deepEqual(lisp.getResultMulti(prog, lisp.defaultEnv), [2, 3, 4]);
+      assert.deepEqual(lisp.run(prog), [2, 3, 4]);
     });
   });
 

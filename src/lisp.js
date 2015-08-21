@@ -18,8 +18,8 @@ function getResult(expr, env) {
   return evaluate(expr, env)[0];
 }
 
-function getResultMulti(prog, env) {
-  var result = [null, env];
+function run(prog) {
+  var result = [null, defaultEnv];
   prog.forEach(function (expr) {
     result = evaluate(expr, result[1]);
   });
@@ -83,8 +83,8 @@ var defaultEnv = {
 };
 
 module.exports = {
+  defaultEnv: defaultEnv,
   evaluate: evaluate,
   getResult: getResult,
-  getResultMulti: getResultMulti,
-  defaultEnv: defaultEnv
+  run: run
 };
