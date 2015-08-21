@@ -3,13 +3,12 @@ function evaluate(expr, env) {
     return [env[expr], env];
   }
   if (Array.isArray(expr)) {
-    var func = expr[0];
-    switch (func) {
+    switch (expr[0]) {
       case 'define': return [null, define(expr, env)];
       case 'lambda': return [lambda(expr[1], expr[2]), env];
       case 'if': return [branch(expr[1], expr[2], expr[3], env), env];
       case 'quote': return [expr[1], env];
-      default: return [invoke(func, expr.slice(1), env), env];
+      default: return [invoke(expr[0], expr.slice(1), env), env];
     }
   }
   return [expr, env];

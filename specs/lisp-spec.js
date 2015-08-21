@@ -15,10 +15,10 @@ describe('lispjs', function () {
 
   describe('simple evaluation', function () {
     it('should evaluate simple values as themselves', function () {
-      var expr1 = 1, expr2 = 'foo';
-      var env = {};
-      assert.deepEqual(lisp.evaluate(expr1, env), [expr1, env]);
-      assert.deepEqual(lisp.evaluate(expr2, env), [expr2, env]);
+      var exprs = [1, 'foo', true, {foo: 'bar'}];
+      exprs.forEach(function (expr) {
+        assert.strictEqual(lisp.getResult(expr, {}), expr);
+      });
     });
 
     it('should evaluate bound symbols to their values', function () {
@@ -29,13 +29,13 @@ describe('lispjs', function () {
   });
 
   describe('function invocation', function () {
-    it('should invoke function without arguments', function () {
+    it('should invoke a function without arguments', function () {
       var expr = ['foo'];
       var env = {foo: constantly('bar')};
       assert.equal(lisp.getResult(expr, env), 'bar');
     });
 
-    it('should invoke function with arguments', function () {
+    it('should invoke a function with arguments', function () {
       var expr = ['foo', 'bar'];
       var env = {foo: identity};
       assert.equal(lisp.getResult(expr, env), 'bar');
@@ -54,7 +54,7 @@ describe('lispjs', function () {
       assert.deepEqual(lisp.evaluate(expr, {}), [null, {foo: 'bar'}]);
     });
 
-    it('should keep the original environment unchanged', function () {
+    it('should not mutate the original environment', function () {
       var env = {};
       var expr = ['define', 'foo', 'bar'];
       lisp.evaluate(expr, env);
@@ -70,21 +70,32 @@ describe('lispjs', function () {
   });
 
   describe('if', function () {
-    it('should allow simple branching', function () {
-      var env = {};
-      assert.equal(lisp.getResult(['if', true, 'foo', 'bar'], env), 'foo');
-      assert.equal(lisp.getResult(['if', false, 'foo', 'bar'], env), 'bar');
+    it('should return first form if condition evaluates to true', function () {
+      var expr = ['if', true, 'foo', 'bar'];
+      assert.equal(lisp.getResult(expr, {}), 'foo');
+    });
+
+    it('should return second form if condition evaluates to false', function () {
+      var expr = ['if', false, 'foo', 'bar'];
+      assert.equal(lisp.getResult(expr, {}), 'bar');
+    });
+
+    it('should evaluate first form if condition evaluates to true', function () {
+      var expr = ['if', true, 'then', 'otherwise'];
+      var env = {then: 'foo'};
+      assert.equal(lisp.getResult(expr, env), 'foo');
+    });
+
+    it('should evaluate first form if condition evaluates to true', function () {
+      var expr = ['if', false, 'then', 'otherwise'];
+      var env = {otherwise: 'bar'};
+      assert.equal(lisp.getResult(expr, env), 'bar');
     });
 
     it('should evaluate condition before branching', function () {
-      assert.equal(lisp.getResult(['if', 'cond', 'foo', 'bar'], {cond: true}), 'foo');
-      assert.equal(lisp.getResult(['if', 'cond', 'foo', 'bar'], {cond: false}), 'bar');
-    });
-
-    it('should evaluate branches', function () {
-      var env = {then: 'foo', otherwise: 'bar'};
-      assert.equal(lisp.getResult(['if', true, 'then', 'otherwise'], env), 'foo');
-      assert.equal(lisp.getResult(['if', false, 'then', 'otherwise'], env), 'bar');
+      var expr = ['if', 'cond', 'foo', 'bar'];
+      var env = {cond: true};
+      assert.equal(lisp.getResult(expr, env), 'foo');
     });
   });
 
@@ -143,12 +154,17 @@ describe('lispjs', function () {
 
       var fibEnv = lisp.evaluate(prog, lisp.defaultEnv)[1];
 
-      assert.equal(lisp.getResult(['fib', 0], fibEnv), 1);
-      assert.equal(lisp.getResult(['fib', 1], fibEnv), 1);
-      assert.equal(lisp.getResult(['fib', 2], fibEnv), 2);
-      assert.equal(lisp.getResult(['fib', 3], fibEnv), 3);
-      assert.equal(lisp.getResult(['fib', 4], fibEnv), 5);
-      assert.equal(lisp.getResult(['fib', 5], fibEnv), 8);
+      var tests = [
+        {input: 0, output: 1},
+        {input: 1, output: 1},
+        {input: 2, output: 2},
+        {input: 3, output: 3},
+        {input: 4, output: 5},
+        {input: 5, output: 8}
+      ];
+      tests.forEach(function (test) {
+        assert.equal(lisp.getResult(['fib', test.input], fibEnv), test.output);
+      });
     });
 
     it('should calculate factorial recursively', function () {
@@ -161,12 +177,17 @@ describe('lispjs', function () {
 
       var factEnv = lisp.evaluate(prog, lisp.defaultEnv)[1];
 
-      assert.equal(lisp.getResult(['fact', 0], factEnv), 1);
-      assert.equal(lisp.getResult(['fact', 1], factEnv), 1);
-      assert.equal(lisp.getResult(['fact', 2], factEnv), 2);
-      assert.equal(lisp.getResult(['fact', 3], factEnv), 6);
-      assert.equal(lisp.getResult(['fact', 4], factEnv), 24);
-      assert.equal(lisp.getResult(['fact', 5], factEnv), 120);
+      var tests = [
+        {input: 0, output: 1},
+        {input: 1, output: 1},
+        {input: 2, output: 2},
+        {input: 3, output: 6},
+        {input: 4, output: 24},
+        {input: 5, output: 120}
+      ];
+      tests.forEach(function (test) {
+        assert.equal(lisp.getResult(['fact', test.input], factEnv), test.output);
+      });
     });
 
     it('should support higher order functions (map)', function () {
