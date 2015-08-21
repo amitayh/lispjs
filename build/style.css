@@ -1,0 +1,28 @@
+.container {
+    width: 600px;
+    margin: auto;
+}
+textarea {
+    font-family: monospace;
+}
+li::before {
+    content: '>';
+    font-family: monospace;
+    color: #cc0000;
+    float: left;
+    margin-left: -2em;
+}
+li {
+    list-style: none;
+}
+.result-item {
+    border-bottom: 1px solid #ccc;
+    margin-bottom: 1em;
+}
+.result-null::after {
+    content: 'null';
+    color: #ccc;
+}
+.error {
+    color: #cc0000;
+}

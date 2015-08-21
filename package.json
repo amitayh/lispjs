@@ -2,19 +2,25 @@
   "name": "lispjs",
   "version": "1.0.0",
   "description": "Simple Lisp implementation in JavaScript",
-  "main": "index.js",
+  "main": "./src/lisp.js",
   "dependencies": {
+    "react": "^0.13.3",
     "readline-sync": "^1.2.19"
   },
   "devDependencies": {
+    "browserify": "^11.0.1",
     "jasmine": "^2.3.2",
-    "mocha": "^2.2.5"
+    "mocha": "^2.2.5",
+    "reactify": "^1.1.1",
+    "uglify-js": "^2.4.24",
+    "watchify": "^3.3.1"
   },
   "scripts": {
     "test": "mocha specs/",
-    "repl": "node src/repl.js"
+    "repl": "node src/repl.js",
+    "start": "watchify -o build/bundle.js -v -d src/app.js",
+    "build": "NODE_ENV=production browserify src/app.js | uglifyjs -cm > build/bundle.min.js"
   },
-  "main": "./src/lisp.js",
   "repository": {
     "type": "git",
     "url": "https://github.com/amitayh/lispjs.git"
@@ -28,5 +34,10 @@
   "bugs": {
     "url": "https://github.com/amitayh/lispjs/issues"
   },
-  "homepage": "https://github.com/amitayh/lispjs"
+  "homepage": "https://github.com/amitayh/lispjs",
+  "browserify": {
+    "transform": [
+      "reactify"
+    ]
+  }
 }
