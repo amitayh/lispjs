@@ -2,6 +2,7 @@ var React = require('react');
 var lisp = require('./lisp');
 
 var enterKeyCode = 13;
+var clearKeyCode = 76; // The letter L
 
 var ResultItem = React.createClass({
   render: function () {
@@ -22,11 +23,11 @@ var InputBox = React.createClass({
   render: function () {
     return (
       <div className="pure-form">
-        <textarea className="pure-input-1" rows="5" cols="80" value={this.state.expr}
-                  onChange={this.onExprChange} onKeyDown={this.onKeyDown} />
+        <textarea className="pure-input-1" rows="5" cols="80" value={this.state.expr} onChange={this.onExprChange} onKeyDown={this.onKeyDown} />
         <p>
-          <button className="pure-button"
-                  onClick={this.onEvalClick}>Evaluate</button>
+          <small className="notes">Ctrl+Enter to evaluate, Ctrl+L to clear</small>
+          <button className="pure-button" onClick={this.onEvalClick}>Evaluate expression</button>{' '}
+          <button className="pure-button" onClick={this.onClearClick}>Clear results</button>
         </p>
       </div>
     );
@@ -35,17 +36,30 @@ var InputBox = React.createClass({
     this.setState({expr: e.target.value});
   },
   onKeyDown: function (e) {
-    if (e.ctrlKey && e.keyCode == enterKeyCode) {
+    if (e.ctrlKey && (e.keyCode == enterKeyCode || e.keyCode == clearKeyCode)) {
       e.preventDefault();
-      this.onEvalClick();
+      if (e.keyCode == enterKeyCode) {
+        this.onEvalClick();
+      }
+      if (e.keyCode == clearKeyCode) {
+        this.onClearClick();
+      }
     }
   },
   onEvalClick: function () {
     var expr = this.state.expr.trim();
     if (expr !== '') {
-      this.props.onEvaluate(expr);
+      try {
+        var parsed = JSON.parse(expr);
+        this.props.onEvaluate(expr, parsed);
+        this.setState({expr: ''});
+      } catch (e) {
+        this.props.onError(e);
+      }
     }
-    this.setState({expr: ''});
+  },
+  onClearClick: function () {
+    this.props.onClear();
   }
 });
 
@@ -73,7 +87,7 @@ var Repl = React.createClass({
       <div>
         <ul>
           {this.getResults()}
-          <li><InputBox onEvaluate={this.onEvaluate} /></li>
+          <li><InputBox onEvaluate={this.onEvaluate} onClear={this.onClear} onError={this.onError} /></li>
         </ul>
         <ErrorView error={this.state.error} />
       </div>
@@ -84,9 +98,8 @@ var Repl = React.createClass({
       return <ResultItem key={index} result={result} />;
     });
   },
-  onEvaluate: function (expr) {
+  onEvaluate: function (expr, parsed) {
     try {
-      var parsed = JSON.parse(expr);
       var evaluated = lisp.evaluate(parsed, this.state.env);
       var newResult = {expr: expr, value: evaluated[0]};
       this.setState({
@@ -95,8 +108,14 @@ var Repl = React.createClass({
         error: null
       });
     } catch (e) {
-      this.setState({error: e});
+      this.onError(e);
     }
+  },
+  onClear: function () {
+    this.setState({results: []});
+  },
+  onError: function (error) {
+    this.setState({error: error});
   }
 });
 

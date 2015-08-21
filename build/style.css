@@ -2,9 +2,11 @@
     width: 600px;
     margin: auto;
 }
+
 textarea {
     font-family: monospace;
 }
+
 li::before {
     content: '>';
     font-family: monospace;
@@ -12,13 +14,28 @@ li::before {
     float: left;
     margin-left: -2em;
 }
+
 li {
     list-style: none;
 }
+
 .result-item {
     border-bottom: 1px solid #ccc;
     margin-bottom: 1em;
 }
+
 .error {
     color: #cc0000;
+}
+
+.notes {
+    float: right;
+    color: #ccc;
+}
+
+.ribbon {
+    position: absolute;
+    top: 0;
+    right: 0;
+    border: 0;
 }
