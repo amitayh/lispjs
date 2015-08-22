@@ -139,6 +139,66 @@ describe('lispjs', function () {
       ];
       assert.equal(lisp.run(prog), 'baz');
     });
+
+    it('should throw when trying to invoke an unbound symbol', function () {
+      function block() {
+        var prog = [
+          ['foo']
+        ];
+        lisp.run(prog);
+      }
+      assert.throws(block, /'foo' is not defined/);
+    });
+
+    it('should throw when trying to invoke a symbol which is not bound to a function', function () {
+      function block() {
+        var prog = [
+          ['define', 'foo', 'bar'],
+          ['foo']
+        ];
+        lisp.run(prog);
+      }
+      assert.throws(block, /'foo' is not a function/);
+    });
+  });
+
+  describe('macros', function () {
+    it('should be able to define simple macros', function () {
+      var prog = [
+        ['define', 'nth',
+          ['lambda', ['coll', 'index'],
+            ['if', ['=', 'index', 0],
+              ['car', 'coll'],
+              ['nth', ['cdr', 'coll'], ['-', 'index', 1]]]]],
+
+        ['defmacro', 'infix', ['expr'],
+          ['list',
+            ['nth', 'expr', 1],
+            ['nth', 'expr', 0],
+            ['nth', 'expr', 2]]],
+
+        ['infix', [1, '+', 2]]
+      ];
+      assert.equal(lisp.run(prog), 3);
+    });
+
+    it('should be able to create a defun macro (define + lambda shortcut)', function () {
+      var prog = [
+        ['defmacro', 'defun', ['name', 'args', 'body'],
+          ['list',
+            ['quote', 'define'],
+            'name',
+            ['list',
+              ['quote', 'lambda'],
+              'args',
+              'body']]],
+
+        ['defun', 'inc', ['n'], ['+', 'n', 1]],
+
+        ['inc', 1]
+      ];
+      assert.equal(lisp.run(prog), 2);
+    });
   });
 
   describe('programs tests', function () {
@@ -207,7 +267,7 @@ describe('lispjs', function () {
             ['+', 'num', 1]]],
 
         // Define some collection
-        ['define', 'coll', ['quote', [1, 2, 3]]],
+        ['define', 'coll', ['list', 1, 2, 3]],
 
         // Map collection with 'inc'
         ['map', 'inc', 'coll']
@@ -228,8 +288,8 @@ describe('lispjs', function () {
 
       var containsEnv = lisp.evaluate(contains, lisp.defaultEnv)[1];
 
-      assert.equal(lisp.getResult(['contains', 0, ['quote', [1, 2, 3]]], containsEnv), false);
-      assert.equal(lisp.getResult(['contains', 2, ['quote', [1, 2, 3]]], containsEnv), true);
+      assert.equal(lisp.getResult(['contains', 0, ['list', 1, 2, 3]], containsEnv), false);
+      assert.equal(lisp.getResult(['contains', 2, ['list', 1, 2, 3]], containsEnv), true);
     });
   });
 
