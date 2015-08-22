@@ -1,8 +1,3 @@
-.container {
-    width: 600px;
-    margin: auto;
-}
-
 textarea {
     font-family: monospace;
 }
@@ -10,9 +5,10 @@ textarea {
 li::before {
     content: '>';
     font-family: monospace;
-    color: #cc0000;
+    color: #a94442;
     float: left;
-    margin-left: -2em;
+    margin-left: -20px;
+    margin-top: 5px;
 }
 
 li {
@@ -20,17 +16,12 @@ li {
 }
 
 .result-item {
-    border-bottom: 1px solid #ccc;
-    margin-bottom: 1em;
-}
-
-.error {
-    color: #cc0000;
+    border-bottom: 1px solid #eee;
+    margin-bottom: 10px;
 }
 
 .notes {
-    float: right;
-    color: #ccc;
+    color: #777;
 }
 
 .ribbon {
