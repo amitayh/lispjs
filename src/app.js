@@ -1,33 +1,54 @@
 var React = require('react');
-var lisp = require('./lisp');
+var interpreter = require('./interpreter');
+var core = require('./core');
 
 var enterKeyCode = 13;
 var clearKeyCode = 76; // The letter L
+var env = core.env;
+
+function Result(expr) {
+  this.expr = expr;
+  this.value = null;
+  this.error = null;
+  this.evaluate();
+}
+Result.prototype.evaluate = function () {
+  try {
+    var parsed = JSON.parse(this.expr);
+    var evaluated = interpreter.evaluate(parsed, env);
+    this.value = evaluated[0];
+    env = evaluated[1];
+  } catch (e) {
+    this.error = e;
+  }
+};
+Result.prototype.hasError = function () {
+  return (this.error !== null);
+};
+Result.prototype.getValue = function () {
+  var error = this.error;
+  return error ? error.toString() : JSON.stringify(this.value);
+};
 
 var ResultItem = React.createClass({
   render: function () {
+    var result = this.props.result;
     return (
       <li className="result-item">
-        <pre className="result-expr">{this.props.result.expr}</pre>
-        <pre className={this.getResultClass()}>{this.getResultValue()}</pre>
+        <pre className="result-expr">{result.expr}</pre>
+        <pre className={this.getResultClass()}>{result.getValue()}</pre>
       </li>
     );
   },
   getResultClass: function () {
-    return this.props.result.error ? 'alert-danger' : '';
-  },
-  getResultValue: function () {
-    var result = this.props.result, error = result.error;
-    return error ? error.toString() : JSON.stringify(result.value);
+    return this.props.result.hasError() ? 'alert-danger' : '';
   }
 });
 
 var InputBox = React.createClass({
-  defaultExpr: '["+", 1, 2]',
   getInitialState: function () {
     return {
-      expr: this.defaultExpr,
-      parsed: JSON.parse(this.defaultExpr),
+      expr: '["+", 1, 2]',
       exprInvalid: false
     }
   },
@@ -65,23 +86,22 @@ var InputBox = React.createClass({
     return (state.exprInvalid || state.expr === '');
   },
   onExprChange: function (e) {
-    var expr = e.target.value, exprInvalid = false, parsed;
-    if (expr !== '') {
-      try {
-        parsed = JSON.parse(expr);
-      } catch (e) {
-        exprInvalid = true;
-      }
+    var expr = e.target.value, exprInvalid = false;
+    try {
+      JSON.parse(expr);
+    } catch (e) {
+      exprInvalid = true;
     }
-    this.setState({expr: expr, parsed: parsed, exprInvalid: exprInvalid});
+    this.setState({expr: expr, exprInvalid: exprInvalid});
   },
   onKeyDown: function (e) {
-    if (e.ctrlKey && (e.keyCode == enterKeyCode || e.keyCode == clearKeyCode)) {
+    var keyCode = e.keyCode;
+    if (e.ctrlKey && (keyCode == enterKeyCode || keyCode == clearKeyCode)) {
       e.preventDefault();
-      if (e.keyCode == enterKeyCode) {
+      if (keyCode == enterKeyCode) {
         this.onEvalClick();
       }
-      if (e.keyCode == clearKeyCode) {
+      if (keyCode == clearKeyCode) {
         this.onClearClick();
       }
     }
@@ -89,13 +109,8 @@ var InputBox = React.createClass({
   onEvalClick: function () {
     var expr = this.state.expr.trim();
     if (expr !== '') {
-      try {
-        var parsed = JSON.parse(expr);
-        this.props.onEvaluate(expr, parsed);
-        this.setState({expr: ''});
-      } catch (e) {
-        this.props.onError(e);
-      }
+      this.props.onEvaluate(expr);
+      this.setState({expr: ''});
     }
   },
   onClearClick: function () {
@@ -103,23 +118,9 @@ var InputBox = React.createClass({
   }
 });
 
-var ErrorView = React.createClass({
-  render: function () {
-    var error = this.props.error;
-    var errorMessage = (error !== null) ? error.toString() : '';
-    return <p className="error" style={this.getStyle()}>{errorMessage}</p>;
-  },
-  getStyle: function () {
-    return {display: (this.props.error === null) ? 'none' : 'block'};
-  }
-});
-
 var Repl = React.createClass({
   getInitialState: function () {
-    return {
-      env: lisp.defaultEnv,
-      results: []
-    };
+    return {results: []};
   },
   render: function () {
     return (
@@ -139,18 +140,9 @@ var Repl = React.createClass({
   getDisableClear: function () {
     return (this.state.results.length === 0);
   },
-  onEvaluate: function (expr, parsed) {
-    var env = this.state.env, value, error;
-    try {
-      var evaluated = lisp.evaluate(parsed, this.state.env);
-      value = evaluated[0];
-      env = evaluated[1];
-    } catch (e) {
-      error = e;
-    }
-    var newResult = {expr: expr, value: value, error: error};
-    var results = this.state.results.concat([newResult]);
-    this.setState({results: results, env: env});
+  onEvaluate: function (expr) {
+    var results = this.state.results.concat([new Result(expr)]);
+    this.setState({results: results});
   },
   onClear: function () {
     this.setState({results: []});
