@@ -16,7 +16,7 @@ $ npm install
 $ npm test
 ```
 
-## Running a REPL (pretty lame... :sweat:)
+## Running a REPL in node (pretty lame... :sweat:)
 
 ```
 $ npm run repl

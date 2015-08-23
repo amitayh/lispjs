@@ -1,7 +1,8 @@
 var readlineSync = require('readline-sync');
 var interpreter = require('./interpreter');
+var core = require('./core');
 
-var env = interpreter.defaultEnv;
+var env = core.env;
 while (true) {
   // Read
   var input = readlineSync.question('> ');
