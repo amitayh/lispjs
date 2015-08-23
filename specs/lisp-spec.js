@@ -241,11 +241,6 @@ describe('lispjs', function () {
                 ['f', ['car', 'coll']],
                 ['map', 'f', ['cdr', 'coll']]]]]],
 
-        // Define unary increment function
-        ['define', 'inc',
-          ['lambda', ['num'],
-            ['+', 'num', 1]]],
-
         // Define some collection
         ['define', 'coll', ['list', 1, 2, 3]],
 
