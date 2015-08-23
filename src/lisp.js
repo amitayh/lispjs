@@ -88,9 +88,7 @@ function branch(cond, then, otherwise, env) {
 }
 
 function invoke(name, args, env) {
-  var func = env[name];
-  if (func === undefined) {
-    throw new Error("'" + name + "' is not defined"); }
+  var func = getResult(name, env);
   if (typeof func !== 'function') {
     throw new Error("'" + name + "' is not a function");
   }

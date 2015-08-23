@@ -46,6 +46,11 @@ describe('lispjs', function () {
       var env = {foo: identity, bar: 'baz'};
       assert.equal(lisp.getResult(expr, env), 'baz');
     });
+
+    it('should invoke anonymous functions', function () {
+      var expr = [['lambda', ['a', 'b'], ['+', 'a', 'b']], 1, 2];
+      assert.equal(lisp.getResult(expr, lisp.defaultEnv), 3);
+    });
   });
 
   describe('define', function () {
@@ -138,16 +143,6 @@ describe('lispjs', function () {
         ['bar', 'baz']
       ];
       assert.equal(lisp.run(prog), 'baz');
-    });
-
-    it('should throw when trying to invoke an unbound symbol', function () {
-      function block() {
-        var prog = [
-          ['foo']
-        ];
-        lisp.run(prog);
-      }
-      assert.throws(block, /'foo' is not defined/);
     });
 
     it('should throw when trying to invoke a symbol which is not bound to a function', function () {
