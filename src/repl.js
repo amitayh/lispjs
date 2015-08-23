@@ -1,14 +1,14 @@
 var readlineSync = require('readline-sync');
-var lisp = require('./lisp');
+var interpreter = require('./interpreter');
 
-var env = lisp.defaultEnv;
+var env = interpreter.defaultEnv;
 while (true) {
   // Read
   var input = readlineSync.question('> ');
   try {
     // Eval
     var expr = JSON.parse(input);
-    var result = lisp.evaluate(expr, env);
+    var result = interpreter.evaluate(expr, env);
     // Print
     console.log(result[0]);
     env = result[1];
