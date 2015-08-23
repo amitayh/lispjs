@@ -28,12 +28,12 @@ function getResult(expr, env) {
 }
 
 /**
- * Run a program in with default environment.
+ * Run a program in with environment.
  * A program is a list of expressions.
  * Returns the evaluation result of the last expression
  */
-function run(prog) {
-  var result = [null, defaultEnv];
+function run(prog, env) {
+  var result = [null, env];
   prog.forEach(function (expr) {
     result = evaluate(expr, result[1]);
   });
@@ -88,9 +88,7 @@ function branch(cond, then, otherwise, env) {
 }
 
 function invoke(name, args, env) {
-  var func = env[name];
-  if (func === undefined) {
-    throw new Error("'" + name + "' is not defined"); }
+  var func = getResult(name, env);
   if (typeof func !== 'function') {
     throw new Error("'" + name + "' is not a function");
   }
@@ -121,26 +119,7 @@ function merge(target, source) {
   }
 }
 
-var defaultEnv = {
-  '<': function (a, b) { return a < b; },
-  '>': function (a, b) { return a > b; },
-  '=': function (a, b) { return a == b; },
-  '+': function (a, b) { return a + b; },
-  '-': function (a, b) { return a - b; },
-  '*': function (a, b) { return a * b; },
-  '/': function (a, b) { return a / b; },
-  and: function (a, b) { return a && b; },
-  or: function (a, b) { return a || b; },
-  not: function (expr) { return !expr; },
-  car: function (xs) { return xs[0]; },
-  cdr: function (xs) { return xs.slice(1); },
-  cons: function (x, xs) { return [x].concat(xs); },
-  empty: function (xs) { return xs.length == 0; },
-  list: function () { return Array.prototype.slice.call(arguments); }
-};
-
 module.exports = {
-  defaultEnv: defaultEnv,
   evaluate: evaluate,
   getResult: getResult,
   run: run
