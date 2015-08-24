@@ -2,6 +2,8 @@
 
 Simple Lisp implementation in JavaScript. [Web REPL demo](http://amitayh.github.io/lispjs/)
 
+> Note: this is an experimental library for educational purposes only
+
 ## Installation
 
 ```
@@ -16,16 +18,15 @@ $ npm install
 $ npm test
 ```
 
-## Running a REPL in node (pretty lame... :sweat:)
-
-```
-$ npm run repl
-```
-
 ## Example programs
 
 ```javascript
-var lisp = require('./lisp');
+var interpreter = require('./interpreter');
+var core = require('./core');
+
+function run(prog) {
+  console.log(interpreter.run(prog, core.env));
+}
 
 // Fibonacci
 var fib = [
@@ -41,7 +42,7 @@ var fib = [
   // Call function
   ['fib', 5]
 ];
-console.log(lisp.run(fib)); // Prints 8
+run(fib); // Prints 8
 
 // Factorial
 var fact = [
@@ -55,7 +56,7 @@ var fact = [
   // Call function
   ['fact', 5]
 ];
-console.log(lisp.run(fact)); // Prints 120
+run(fact); // Prints 120
 
 // Map
 var map = [
@@ -68,18 +69,13 @@ var map = [
           ['f', ['car', 'coll']],
           ['map', 'f', ['cdr', 'coll']]]]]],
 
-  // Define unary increment function
-  ['define', 'inc',
-    ['lambda', ['num'],
-      ['+', 'num', 1]]],
-
   // Define some collection
   ['define', 'coll', ['quote', [1, 2, 3]]],
 
   // Map collection with 'inc'
   ['map', 'inc', 'coll']
 ];
-console.log(lisp.run(map)); // Prints [2, 3, 4]
+run(map); // Prints [2, 3, 4]
 
 // Contains (checks if element exists in collection)
 var contains = [
@@ -98,5 +94,5 @@ var contains = [
   // Check if collection contains 2
   ['contains', 2, 'coll']
 ];
-console.log(lisp.run(contains)); // Prints true
+run(contains); // Prints true
 ```
