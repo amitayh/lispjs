@@ -30,18 +30,35 @@ Result.prototype.getValue = function () {
   return error ? error.toString() : JSON.stringify(this.value);
 };
 
+var Code = React.createClass({
+  render: function () {
+    return (
+      <pre ref="block">
+        <code className={this.props.lang}>{this.props.children}</code>
+      </pre>
+    );
+  },
+  componentDidMount: function () {
+    var block = React.findDOMNode(this.refs.block);
+    hljs.highlightBlock(block);
+  }
+});
+
 var ResultItem = React.createClass({
   render: function () {
-    var result = this.props.result;
     return (
       <li className="result-item">
-        <pre className="result-expr">{result.expr}</pre>
-        <pre className={this.getResultClass()}>{result.getValue()}</pre>
+        <Code lang="javascript">{this.props.result.expr}</Code>
+        {this.getResult()}
       </li>
     );
   },
-  getResultClass: function () {
-    return this.props.result.hasError() ? 'alert-danger' : '';
+  getResult: function () {
+    var result = this.props.result;
+    var value = result.getValue();
+    return result.hasError() ?
+      <pre className="alert-danger">{value}</pre> :
+      <Code lang="javascript">{value}</Code>;
   }
 });
 
