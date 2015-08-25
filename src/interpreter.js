@@ -10,7 +10,7 @@ function evaluate(expr, env) {
     switch (expr[0]) {
       case 'define': return [null, define(expr[1], expr[2], env)];
       case 'defmacro': return [null, defmacro(expr[1], expr[2], expr[3], env)];
-      case 'lambda': return [lambda(expr[1], expr[2]), env];
+      case 'lambda': return [lambda(expr[1], expr[2], env), env];
       case 'if': return [branch(expr[1], expr[2], expr[3], env), env];
       case 'quote': return [expr[1], env];
       default: return [invoke(expr[0], expr.slice(1), env), env];
@@ -50,17 +50,20 @@ function define(name, expr, env) {
   return newEnv;
 }
 
-function lambda(argsNames, body) {
+function lambda(argsNames, body, env) {
   return function () {
-    var env = bindArguments(this, argsNames, arguments);
-    return getResult(body, env);
+    var lambdaEnv = copy(this);
+    merge(lambdaEnv, env);
+    bindArguments(lambdaEnv, argsNames, arguments);
+    return getResult(body, lambdaEnv);
   };
 }
 
 function defmacro(name, argsNames, body, env) {
   var newEnv = copy(env);
   var macro = function () {
-    var macroEnv = bindArguments(this, argsNames, arguments);
+    var macroEnv = copy(this);
+    bindArguments(macroEnv, argsNames, arguments);
     var evaluatedBody = getResult(body, macroEnv);
     return getMacroResult(evaluatedBody, newEnv);
   };
@@ -76,11 +79,9 @@ function getMacroResult(expr, env) {
 }
 
 function bindArguments(env, argsNames, args) {
-  var newEnv = copy(env);
   for (var i = 0; i < args.length; i++) {
-    newEnv[argsNames[i]] = args[i];
+    env[argsNames[i]] = args[i];
   }
-  return newEnv;
 }
 
 function branch(cond, then, otherwise, env) {
