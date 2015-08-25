@@ -137,6 +137,18 @@ describe('lispjs', function () {
       assert.equal(interpreter.run(prog, core.env), 'bar');
     });
 
+    it('keeps call site scope', function () {
+      var prog = [
+        ['define', 'foo',
+          ['lambda', ['a'],
+            ['lambda', ['b'],
+              ['+', 'a', 'b']]]],
+
+        [['foo', 1], 2]
+      ];
+      assert.equal(interpreter.run(prog, core.env), 3);
+    });
+
     it('gives local scope higher priority', function () {
       var prog = [
         ['define', 'foo', 'bar'],

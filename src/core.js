@@ -30,11 +30,6 @@ var buildEnv = [
         'args',
         'body']]],
 
-  ['defun', 'nth', ['coll', 'index'],
-    ['if', ['=', 'index', 0],
-      ['car', 'coll'],
-      ['nth', ['cdr', 'coll'], ['-', 'index', 1]]]],
-
   ['defun', 'even', ['n'],
     ['=', ['%', 'n', 2], 0]],
 
@@ -43,6 +38,14 @@ var buildEnv = [
 
   ['defun', 'inc', ['n'],
     ['+', 'n', 1]],
+
+  ['defun', 'dec', ['n'],
+    ['-', 'n', 1]],
+
+  ['defun', 'nth', ['coll', 'index'],
+    ['if', ['=', 'index', 0],
+      ['car', 'coll'],
+      ['nth', ['cdr', 'coll'], ['dec', 'index']]]],
 
   ['defun', 'filter-index-helper', ['pred', 'coll', 'index'],
     ['if', ['empty', 'coll'],
