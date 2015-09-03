@@ -1,6 +1,33 @@
-var interpreter = require('./interpreter');
+function evaluate(expr, env) {
+  if (isBound(expr, env)) {
+    return env[expr];
+  }
+  if (Array.isArray(expr)) {
+    return invoke(expr[0], expr.slice(1), env);
+  }
+  return expr;
+}
 
+function invoke(name, args, env) {
+  var func = evaluate(name, env);
+  if (typeof func !== 'function') {
+    throw new Error("'" + name + "' is not a function");
+  }
+  if (!isSpecialForm(func)) {
+    args = args.map(function (arg) {
+      return evaluate(arg, env);
+    });
+  }
+  return func.apply(env, args);
+}
+
+var specialFormProp = '_specialForm';
 var defaultEnv = {
+  lambda: specialForm(lambda),
+  define: specialForm(define),
+  defmacro: specialForm(defmacro),
+  quote: specialForm(quote),
+  'if': specialForm(branch),
   '<': function (a, b) { return a < b; },
   '>': function (a, b) { return a > b; },
   '=': function (a, b) { return a == b; },
@@ -19,7 +46,6 @@ var defaultEnv = {
   size: function (xs) { return xs.length; },
   list: function () { return Array.prototype.slice.call(arguments); }
 };
-
 var buildEnv = [
   ['defmacro', 'defun', ['name', 'args', 'body'],
     ['list',
@@ -30,12 +56,8 @@ var buildEnv = [
         'args',
         'body']]],
 
-  ['define', 'empty',
-    ['lambda', ['coll'],
-      ['=', ['size', 'coll'], 0]]],
-
-  //['defun', 'empty' ['coll'],
-  //  ['=', ['size', 'coll'], 0]],
+  ['defun', 'empty', ['coll'],
+    ['=', ['size', 'coll'], 0]],
 
   ['defun', 'even', ['n'],
     ['=', ['%', 'n', 2], 0]],
@@ -54,31 +76,24 @@ var buildEnv = [
       ['car', 'coll'],
       ['nth', ['cdr', 'coll'], ['dec', 'index']]]],
 
-  ['define', 'drop',
-    ['lambda', ['n', 'coll'],
-      ['if', ['=', 'n', 0],
-        'coll',
-        ['drop', ['dec', 'n'], ['cdr', 'coll']]]]],
+  ['defun', 'drop', ['n', 'coll'],
+    ['if', ['=', 'n', 0],
+      'coll',
+      ['drop', ['dec', 'n'], ['cdr', 'coll']]]],
 
-  //['defun', 'drop', ['n', 'coll'],
-  //  ['if', ['=', 'n', 0],
-  //    'coll',
-  //    ['drop', ['dec', 'n'], ['cdr', 'coll']]]],
+  ['defun', 'take-nth', ['n', 'coll'],
+    ['if', ['empty', 'coll'],
+      'coll',
+      ['cons',
+        ['car', 'coll'],
+        ['take-nth', 'n', ['drop', 'n', 'coll']]]]],
 
-  ['define', 'take-nth',
-    ['lambda', ['n', 'coll'],
-      ['if', ['empty', 'coll'],
-        'coll',
-        ['cons',
-          ['car', 'coll'],
-          ['take-nth', 'n', ['drop', 'n', 'coll']]]]]],
-
-  //['defun', 'take-nth', ['n', 'coll'],
-  //  ['if', ['empty', 'coll'],
-  //    'coll',
-  //    ['cons',
-  //      ['car', 'coll'],
-  //      ['take-nth', 'n', ['drop', 'n', 'coll']]]]],
+  ['defun', 'map', ['f', 'coll'],
+    ['if', ['empty', 'coll'],
+      'coll',
+      ['cons',
+        ['f', ['car', 'coll']],
+        ['map', 'f', ['cdr', 'coll']]]]],
 
   ['defmacro', 'let', ['bindings', 'body'],
     ['concat',
@@ -90,18 +105,24 @@ var buildEnv = [
       ['take-nth', 2, ['cdr', 'bindings']]]]
 ];
 
-var evaluate = interpreter.evaluate2;
+function isBound(expr, env) {
+  return (typeof expr === 'string' && env[expr] !== undefined);
+}
 
-function run(prog) {
-  var result = [null, defaultEnv];
-  prog.forEach(function (expr) {
-    result = interpreter.evaluate(expr, result[1]);
+function isSpecialForm(func) {
+  return func[specialFormProp] !== undefined;
+}
+
+function getDefaultEnv() {
+  var env = copy(defaultEnv);
+  buildEnv.forEach(function (expr) {
+    evaluate(expr, env);
   });
-  return result;
+  return env;
 }
 
 function specialForm(func) {
-  func.isSpecialForm = true;
+  func[specialFormProp] = true;
   return func;
 }
 
@@ -135,7 +156,8 @@ function quote(expr) {
 
 function branch(cond, then, otherwise) {
   var env = this;
-  return evaluate(cond, env) ? evaluate(then, env) : evaluate(otherwise, env);
+  var form = evaluate(cond, env) ? then : otherwise;
+  return evaluate(form, env);
 }
 
 function copy(obj) {
@@ -162,35 +184,7 @@ function bindArguments(env, argsNames, args) {
   }
 }
 
-function getDefaultEnv() {
-  return {
-    lambda: specialForm(lambda),
-    define: specialForm(define),
-    defmacro: specialForm(defmacro),
-    quote: specialForm(quote),
-    'if': specialForm(branch),
-
-    '<': function (a, b) { return a < b; },
-    '>': function (a, b) { return a > b; },
-    '=': function (a, b) { return a == b; },
-    '+': function (a, b) { return a + b; },
-    '-': function (a, b) { return a - b; },
-    '*': function (a, b) { return a * b; },
-    '/': function (a, b) { return a / b; },
-    '%': function (a, b) { return a % b; },
-    and: function (a, b) { return a && b; },
-    or: function (a, b) { return a || b; },
-    not: function (expr) { return !expr; },
-    car: function (xs) { return xs[0]; },
-    cdr: function (xs) { return xs.slice(1); },
-    cons: function (x, xs) { return [x].concat(xs); },
-    concat: function(xs, ys) { return xs.concat(ys); },
-    size: function (xs) { return xs.length; },
-    list: function () { return Array.prototype.slice.call(arguments); }
-  };
-}
-
 module.exports = {
-  getDefaultEnv: getDefaultEnv,
-  env: {} //run(buildEnv)[1]
+  evaluate: evaluate,
+  getDefaultEnv: getDefaultEnv
 };

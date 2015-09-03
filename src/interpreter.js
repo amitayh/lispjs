@@ -1,3 +1,28 @@
+function evaluate2(expr, env) {
+  if (isBound(expr, env)) {
+    return env[expr];
+  }
+  if (Array.isArray(expr)) {
+    return invoke2(expr[0], expr.slice(1), env);
+  }
+  return expr;
+}
+
+function invoke2(name, args, env) {
+  var func = evaluate2(name, env);
+  if (typeof func !== 'function') {
+    throw new Error("'" + name + "' is not a function");
+  }
+  if (!func.isSpecialForm) {
+    args = args.map(function (arg) {
+      return evaluate2(arg, env);
+    });
+  }
+  return func.apply(env, args);
+}
+
+
+
 /**
  * Evaluate an expression with given environment.
  * Returns a tuple [result, env] - with evaluation result and new environment
@@ -45,8 +70,9 @@ function isBound(expr, env) {
 }
 
 function define(name, expr, env) {
-  var newEnv = copy(env);
-  newEnv[name] = getResult(expr, env);
+  var result = evaluate(expr, env);
+  var newEnv = copy(result[1]);
+  newEnv[name] = result[0];
   return newEnv;
 }
 
@@ -60,6 +86,9 @@ function lambda(argsNames, body, env) {
 }
 
 function defmacro(name, argsNames, body, env) {
+
+  //console.log(body);
+
   var newEnv = copy(env);
   var macro = function () {
     var macroEnv = copy(this);
@@ -89,17 +118,20 @@ function branch(cond, then, otherwise, env) {
 }
 
 function invoke(name, args, env) {
-  var func = getResult(name, env);
+  var result = evaluate(name, env);
+  var func = result[0];
+  var funcEnv = copy(result[1]);
+  merge(funcEnv, env);
   if (typeof func !== 'function') {
     throw new Error("'" + name + "' is not a function");
   }
   if (!func.isMacro) {
     // Evaluate arguments if function is not a macro
     args = args.map(function (arg) {
-      return getResult(arg, env);
+      return getResult(arg, funcEnv);
     });
   }
-  return func.apply(env, args);
+  return func.apply(funcEnv, args);
 }
 
 function copy(obj) {
@@ -121,6 +153,7 @@ function merge(target, source) {
 }
 
 module.exports = {
+  evaluate2: evaluate2,
   evaluate: evaluate,
   getResult: getResult,
   run: run
