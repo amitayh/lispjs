@@ -27,7 +27,9 @@ var defaultEnv = {
   list: function () { return Array.prototype.slice.call(arguments); }
 };
 
-// Enrich the default environment
+/**
+ * Enrich the default environment with common definitions
+ */
 var buildEnv = [
   /**
    * Helper macro for defining functions:
@@ -121,6 +123,9 @@ var buildEnv = [
       ['take-nth', 2, ['cdr', 'bindings']]]]
 ];
 
+/**
+ * Build default environment
+ */
 function getDefaultEnv() {
   var env = utils.copy(defaultEnv);
   buildEnv.forEach(function (expr) {
@@ -130,6 +135,5 @@ function getDefaultEnv() {
 }
 
 module.exports = {
-  getDefaultEnv: getDefaultEnv,
-  buildEnv: buildEnv
+  getDefaultEnv: getDefaultEnv
 };

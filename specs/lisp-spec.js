@@ -223,7 +223,7 @@ describe('lispjs', function () {
         // Define some collection
         ['define', 'coll', ['list', 1, 2, 3]],
 
-        // Map odd numbers
+        // Filter odd numbers
         ['filter', 'odd', 'coll']
       ];
 

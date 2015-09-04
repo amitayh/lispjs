@@ -1,3 +1,6 @@
+/**
+ * Simple object copy
+ */
 function copy(obj) {
   var result = {};
   for (var key in obj) {
