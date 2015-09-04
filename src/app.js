@@ -1,10 +1,9 @@
 var React = require('react');
 var interpreter = require('./interpreter');
-var core = require('./core');
+var env = require('./env').getDefaultEnv();
 
 var enterKeyCode = 13;
 var clearKeyCode = 76; // The letter L
-var env = core.env;
 
 function Result(expr) {
   this.expr = expr;
@@ -15,9 +14,7 @@ function Result(expr) {
 Result.prototype.evaluate = function () {
   try {
     var parsed = JSON.parse(this.expr);
-    var evaluated = interpreter.evaluate(parsed, env);
-    this.value = evaluated[0];
-    env = evaluated[1];
+    this.value = interpreter.evaluate(parsed, env);
   } catch (e) {
     this.error = e;
   }
