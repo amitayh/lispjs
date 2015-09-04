@@ -121,11 +121,12 @@ var InputBox = React.createClass({
     }
   },
   onEvalClick: function () {
-    var expr = this.state.expr.trim();
-    if (expr !== '') {
-      this.props.onEvaluate(expr);
-      this.setState({expr: ''});
+    if (this.getEvalDisabled()) {
+      return;
     }
+    var expr = this.state.expr.trim();
+    this.props.onEvaluate(expr);
+    this.setState({expr: ''});
   },
   onClearClick: function () {
     this.props.onClear();
