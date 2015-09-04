@@ -5,11 +5,6 @@ var utils = require('./utils');
 var evaluate = interpreter.evaluate;
 var copy = utils.copy;
 
-function specialForm(func) {
-  func[constants.specialFormProp] = true;
-  return func;
-}
-
 function lambda(argNames, body) {
   var env = this;
   return function () {
@@ -43,6 +38,11 @@ function branch(cond, then, otherwise) {
   var env = this;
   var form = evaluate(cond, env) ? then : otherwise;
   return evaluate(form, env);
+}
+
+function specialForm(func) {
+  func[constants.specialFormProp] = true;
+  return func;
 }
 
 function bindArguments(env, argsNames, args) {

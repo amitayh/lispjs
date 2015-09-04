@@ -1,6 +1,7 @@
 var assert = require('assert');
 var interpreter = require('../src/interpreter');
 var env = require('../src/env');
+var lisp = require('../src/lisp');
 
 describe('lispjs', function () {
 
@@ -15,18 +16,9 @@ describe('lispjs', function () {
   }
 
   var getDefaultEnv = env.getDefaultEnv;
-
   function evaluate(expr, env) {
     env = env || getDefaultEnv();
     return interpreter.evaluate(expr, env);
-  }
-
-  function run(prog) {
-    var env = getDefaultEnv(), value = null;
-    prog.forEach(function (expr) {
-      value = interpreter.evaluate(expr, env);
-    });
-    return value;
   }
 
   describe('simple evaluation', function () {
@@ -75,7 +67,7 @@ describe('lispjs', function () {
         ['define', 'foo', 'bar'],
         'foo'
       ];
-      assert.equal(run(prog), 'bar');
+      assert.equal(lisp.run(prog), 'bar');
     });
 
     it('evaluates values', function () {
@@ -84,7 +76,7 @@ describe('lispjs', function () {
         ['define', 'foo', 'bar'],
         'foo'
       ];
-      assert.equal(run(prog), 'baz');
+      assert.equal(lisp.run(prog), 'baz');
     });
   });
 
@@ -104,7 +96,7 @@ describe('lispjs', function () {
         ['define', 'then', 'foo'],
         ['if', true, 'then', 'otherwise']
       ];
-      assert.equal(run(prog), 'foo');
+      assert.equal(lisp.run(prog), 'foo');
     });
 
     it('evaluates first form if condition evaluates to true', function () {
@@ -112,7 +104,7 @@ describe('lispjs', function () {
         ['define', 'otherwise', 'bar'],
         ['if', false, 'then', 'otherwise']
       ];
-      assert.equal(run(prog), 'bar');
+      assert.equal(lisp.run(prog), 'bar');
     });
 
     it('evaluates condition before branching', function () {
@@ -120,7 +112,7 @@ describe('lispjs', function () {
         ['define', 'cond', false],
         ['if', 'cond', 'foo', 'bar']
       ];
-      assert.equal(run(prog), 'bar');
+      assert.equal(lisp.run(prog), 'bar');
     });
   });
 
@@ -130,7 +122,7 @@ describe('lispjs', function () {
         ['define', 'foo', 'bar'],
         ['quote', ['foo']]
       ];
-      assert.deepEqual(run(prog), ['foo']);
+      assert.deepEqual(lisp.run(prog), ['foo']);
     });
   });
 
@@ -140,7 +132,7 @@ describe('lispjs', function () {
         ['define', 'foo', ['lambda', [], 'bar']],
         ['foo']
       ];
-      assert.equal(run(prog), 'bar');
+      assert.equal(lisp.run(prog), 'bar');
     });
 
     it('binds arguments to call values', function () {
@@ -148,7 +140,7 @@ describe('lispjs', function () {
         ['define', 'foo', ['lambda', ['arg'], 'arg']],
         ['foo', 'bar']
       ];
-      assert.equal(run(prog), 'bar');
+      assert.equal(lisp.run(prog), 'bar');
     });
 
     it('supports lexical scope', function () {
@@ -157,7 +149,7 @@ describe('lispjs', function () {
         ['define', 'bar', ['lambda', [], 'foo']],
         ['bar']
       ];
-      assert.equal(run(prog), 'bar');
+      assert.equal(lisp.run(prog), 'bar');
     });
 
     it('supports currying', function () {
@@ -169,7 +161,7 @@ describe('lispjs', function () {
 
         [['foo', 1], 2]
       ];
-      assert.equal(run(prog), 3);
+      assert.equal(lisp.run(prog), 3);
     });
 
     it('gives local scope higher priority', function () {
@@ -178,7 +170,7 @@ describe('lispjs', function () {
         ['define', 'bar', ['lambda', ['foo'], 'foo']],
         ['bar', 'baz']
       ];
-      assert.equal(run(prog), 'baz');
+      assert.equal(lisp.run(prog), 'baz');
     });
 
     it('throws when trying to invoke a symbol which is not bound to a function', function () {
@@ -187,7 +179,7 @@ describe('lispjs', function () {
           ['define', 'foo', 'bar'],
           ['foo']
         ];
-        run(prog);
+        lisp.run(prog);
       }
       assert.throws(block, /'foo' is not a function/);
     });
@@ -204,12 +196,62 @@ describe('lispjs', function () {
 
         ['infix', [1, '+', 2]]
       ];
-      assert.equal(run(prog), 3);
+      assert.equal(lisp.run(prog), 3);
     });
 
     it('defines the let bindings macro in core environment', function () {
       var expr = ['let', ['a', 1, 'b', 2], ['+', 'a', 'b']];
       assert.equal(evaluate(expr), 3);
+    });
+  });
+
+  describe('higher order functions', function () {
+    it('supports map', function () {
+      var prog = [
+        // Define some collection
+        ['define', 'coll', ['list', 1, 2, 3]],
+
+        // Map collection with 'inc'
+        ['map', 'inc', 'coll']
+      ];
+
+      assert.deepEqual(lisp.run(prog), [2, 3, 4]);
+    });
+
+    it('supports filter', function () {
+      var prog = [
+        // Define some collection
+        ['define', 'coll', ['list', 1, 2, 3]],
+
+        // Map odd numbers
+        ['filter', 'odd', 'coll']
+      ];
+
+      assert.deepEqual(lisp.run(prog), [1, 3]);
+    });
+
+    it('supports the Y-combinator', function () {
+      var prog = [
+        // Define the Y-combinator
+        ['define', 'Y',
+          ['lambda', ['le'],
+            [['lambda', ['f'], ['f', 'f']],
+              ['lambda', ['f'],
+                ['le', ['lambda', ['x'], [['f', 'f'], 'x']]]]]]],
+
+        // Define factorial without self-reference
+        ['define', 'fact',
+          ['lambda', ['f'],
+            ['lambda', ['n'],
+              ['if', ['zero', 'n'],
+                1,
+                ['*', 'n', ['f', ['dec', 'n']]]]]]],
+
+        // Apply factorial using the Y-combinator
+        [['Y', 'fact'], 5]
+      ];
+
+      assert.equal(lisp.run(prog), 120);
     });
   });
 
@@ -236,56 +278,6 @@ describe('lispjs', function () {
       ];
       tests.forEach(function (test) {
         assert.equal(evaluate(['fib', test.input], env), test.output);
-      });
-    });
-
-    describe('higher order functions', function () {
-      it('supports map', function () {
-        var prog = [
-          // Define some collection
-          ['define', 'coll', ['list', 1, 2, 3]],
-
-          // Map collection with 'inc'
-          ['map', 'inc', 'coll']
-        ];
-
-        assert.deepEqual(run(prog), [2, 3, 4]);
-      });
-
-      it('supports filter', function () {
-        var prog = [
-          // Define some collection
-          ['define', 'coll', ['list', 1, 2, 3]],
-
-          // Map odd numbers
-          ['filter', 'odd', 'coll']
-        ];
-
-        assert.deepEqual(run(prog), [1, 3]);
-      });
-
-      it('supports the Y-combinator', function () {
-        var prog = [
-          // Define the Y-combinator
-          ['define', 'Y',
-            ['lambda', ['le'],
-              [['lambda', ['f'], ['f', 'f']],
-                ['lambda', ['f'],
-                  ['le', ['lambda', ['x'], [['f', 'f'], 'x']]]]]]],
-
-          // Define factorial without self-reference
-          ['define', 'fact',
-            ['lambda', ['f'],
-              ['lambda', ['n'],
-                ['if', ['zero', 'n'],
-                  1,
-                  ['*', 'n', ['f', ['dec', 'n']]]]]]],
-
-          // Apply factorial using the Y-combinator
-          [['Y', 'fact'], 5]
-        ];
-
-        assert.equal(run(prog), 120);
       });
     });
   });
