@@ -41,4 +41,4 @@ var fib = [
 console.log(lisp.run(fib)); // Prints 8
 ```
 
-(more examples in [here](specs/lisp-specs.js) and [here](src/env.js))
+(more examples in [here](specs/lisp-spec.js) and [here](src/env.js))
