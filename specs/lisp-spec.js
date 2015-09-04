@@ -1,5 +1,6 @@
 var assert = require('assert');
-var lisp = require('../src/lisp');
+var interpreter = require('../src/interpreter');
+var env = require('../src/env');
 
 describe('lispjs', function () {
 
@@ -13,15 +14,17 @@ describe('lispjs', function () {
     };
   }
 
+  var getDefaultEnv = env.getDefaultEnv;
+
   function evaluate(expr, env) {
-    env = env || lisp.getDefaultEnv();
-    return lisp.evaluate(expr, env);
+    env = env || getDefaultEnv();
+    return interpreter.evaluate(expr, env);
   }
 
   function run(prog) {
-    var env = lisp.getDefaultEnv(), value = null;
+    var env = getDefaultEnv(), value = null;
     prog.forEach(function (expr) {
-      value = lisp.evaluate(expr, env);
+      value = interpreter.evaluate(expr, env);
     });
     return value;
   }
@@ -220,7 +223,7 @@ describe('lispjs', function () {
               ['fib', ['-', 'n', 1]],
               ['fib', ['-', 'n', 2]]]]];
 
-      var env = lisp.getDefaultEnv();
+      var env = getDefaultEnv();
       evaluate(fib, env);
 
       var tests = [
