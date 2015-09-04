@@ -22,6 +22,7 @@ function lambda(argNames, body) {
 function define(name, expr) {
   var env = this;
   env[name] = evaluate(expr, env);
+  return null;
 }
 
 function defmacro(name, argNames, body) {
