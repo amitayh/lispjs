@@ -37,11 +37,14 @@ var buildEnv = [
         'args',
         'body']]],
 
+  ['defun', 'zero', ['n'],
+    ['=', 'n', 0]],
+
   ['defun', 'empty', ['coll'],
-    ['=', ['size', 'coll'], 0]],
+    ['zero', ['size', 'coll']]],
 
   ['defun', 'even', ['n'],
-    ['=', ['%', 'n', 2], 0]],
+    ['zero', ['%', 'n', 2]]],
 
   ['defun', 'odd', ['n'],
     ['not', ['even', 'n']]],
@@ -53,12 +56,12 @@ var buildEnv = [
     ['-', 'n', 1]],
 
   ['defun', 'nth', ['coll', 'index'],
-    ['if', ['=', 'index', 0],
+    ['if', ['zero', 'index'],
       ['car', 'coll'],
       ['nth', ['cdr', 'coll'], ['dec', 'index']]]],
 
   ['defun', 'drop', ['n', 'coll'],
-    ['if', ['=', 'n', 0],
+    ['if', ['zero', 'n'],
       'coll',
       ['drop', ['dec', 'n'], ['cdr', 'coll']]]],
 
@@ -75,6 +78,13 @@ var buildEnv = [
       ['cons',
         ['f', ['car', 'coll']],
         ['map', 'f', ['cdr', 'coll']]]]],
+
+  ['defun', 'filter', ['pred', 'coll'],
+    ['if', ['empty', 'coll'],
+      'coll',
+      ['if', ['pred', ['car', 'coll']],
+        ['cons', ['car', 'coll'], ['filter', 'pred', ['cdr', 'coll']]],
+        ['filter', 'pred', ['cdr', 'coll']]]]],
 
   ['defmacro', 'let', ['bindings', 'body'],
     ['concat',

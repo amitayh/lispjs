@@ -239,16 +239,54 @@ describe('lispjs', function () {
       });
     });
 
-    it('supports higher order functions (map)', function () {
-      var prog = [
-        // Define some collection
-        ['define', 'coll', ['list', 1, 2, 3]],
+    describe('higher order functions', function () {
+      it('supports map', function () {
+        var prog = [
+          // Define some collection
+          ['define', 'coll', ['list', 1, 2, 3]],
 
-        // Map collection with 'inc'
-        ['map', 'inc', 'coll']
-      ];
+          // Map collection with 'inc'
+          ['map', 'inc', 'coll']
+        ];
 
-      assert.deepEqual(run(prog), [2, 3, 4]);
+        assert.deepEqual(run(prog), [2, 3, 4]);
+      });
+
+      it('supports filter', function () {
+        var prog = [
+          // Define some collection
+          ['define', 'coll', ['list', 1, 2, 3]],
+
+          // Map odd numbers
+          ['filter', 'odd', 'coll']
+        ];
+
+        assert.deepEqual(run(prog), [1, 3]);
+      });
+
+      it('supports the Y-combinator', function () {
+        var prog = [
+          // Define the Y-combinator
+          ['define', 'Y',
+            ['lambda', ['le'],
+              [['lambda', ['f'], ['f', 'f']],
+                ['lambda', ['f'],
+                  ['le', ['lambda', ['x'], [['f', 'f'], 'x']]]]]]],
+
+          // Define factorial without self-reference
+          ['define', 'fact',
+            ['lambda', ['f'],
+              ['lambda', ['n'],
+                ['if', ['zero', 'n'],
+                  1,
+                  ['*', 'n', ['f', ['dec', 'n']]]]]]],
+
+          // Apply factorial using the Y-combinator
+          [['Y', 'fact'], 5]
+        ];
+
+        assert.equal(run(prog), 120);
+      });
     });
   });
 
