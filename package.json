@@ -2,7 +2,7 @@
   "name": "lispjs",
   "version": "1.0.0",
   "description": "Simple Lisp implementation in JavaScript",
-  "main": "index.js",
+  "main": "./src/lisp.js",
   "dependencies": {
     "readline-sync": "^1.2.19"
   },
@@ -14,7 +14,6 @@
     "test": "mocha specs/",
     "repl": "node src/repl.js"
   },
-  "main": "./src/lisp.js",
   "repository": {
     "type": "git",
     "url": "https://github.com/amitayh/lispjs.git"

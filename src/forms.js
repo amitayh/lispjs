@@ -37,6 +37,7 @@ function defmacro(name, argNames, body) {
     var expanded = evaluate(body, macroEnv);
     return evaluate(expanded, env);
   });
+  return null;
 }
 
 /**
