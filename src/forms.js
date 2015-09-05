@@ -5,6 +5,9 @@ var utils = require('./utils');
 var evaluate = interpreter.evaluate;
 var copy = utils.copy;
 
+/**
+ * Lambda form (anonymous function)
+ */
 function lambda(argNames, body) {
   var env = this;
   return function () {
@@ -14,12 +17,18 @@ function lambda(argNames, body) {
   };
 }
 
+/**
+ * Bind value in environment
+ */
 function define(name, expr) {
   var env = this;
   env[name] = evaluate(expr, env);
   return null;
 }
 
+/**
+ * Define a macro
+ */
 function defmacro(name, argNames, body) {
   var env = this;
   env[name] = specialForm(function () {
@@ -28,12 +37,19 @@ function defmacro(name, argNames, body) {
     var expanded = evaluate(body, macroEnv);
     return evaluate(expanded, env);
   });
+  return null;
 }
 
+/**
+ * Quote an expression (quoted expressions are not evaluated)
+ */
 function quote(expr) {
   return expr;
 }
 
+/**
+ * Conditional expression (if-else)
+ */
 function branch(cond, then, otherwise) {
   var env = this;
   var form = evaluate(cond, env) ? then : otherwise;

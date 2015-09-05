@@ -1,5 +1,9 @@
 var constants = require('./constants');
 
+/**
+ * Evaluate an expression with given environment.
+ * Returns evaluation result (may mutate environment).
+ */
 function evaluate(expr, env) {
   if (isBound(expr, env)) {
     return env[expr];
@@ -28,7 +32,7 @@ function isBound(expr, env) {
 }
 
 function isSpecialForm(func) {
-  return func[constants.specialFormProp] !== undefined;
+  return (func[constants.specialFormProp] !== undefined);
 }
 
 module.exports = {
