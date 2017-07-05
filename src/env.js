@@ -112,6 +112,12 @@ var buildEnv = [
         ['cons', ['car', 'coll'], ['filter', 'pred', ['cdr', 'coll']]],
         ['filter', 'pred', ['cdr', 'coll']]]]],
 
+  // Reduce a collection
+  ['defun', 'reduce', ['coll', 'f', 'acc'],
+    ['if', ['empty', 'coll'],
+      'acc',
+      ['reduce', ['cdr', 'coll'], 'f', ['f', 'acc', ['car', 'coll']]]]],
+
   // Create a lexical scope with bound arguments and execute body in context
   ['defmacro', 'let', ['bindings', 'body'],
     ['concat',

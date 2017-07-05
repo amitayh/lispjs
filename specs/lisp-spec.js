@@ -230,6 +230,18 @@ describe('lispjs', function () {
       assert.deepEqual(lisp.run(prog), [1, 3]);
     });
 
+    it('supports reduce', function () {
+      var prog = [
+        // Define some collection
+        ['define', 'coll', ['list', 1, 2, 3]],
+
+        // Sum numbers
+        ['reduce', 'coll', '+', 0]
+      ];
+
+      assert.equal(lisp.run(prog), 6);
+    });
+
     it('supports the Y-combinator', function () {
       var prog = [
         // Define the Y-combinator
