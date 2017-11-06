@@ -5,5 +5,5 @@ node_js:
   - 0.11
 
 script:
-  - istanbul cover npm test
+  - istanbul cover ./node_modules/mocha/bin/_mocha -- specs
   - codecov
