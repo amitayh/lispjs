@@ -4,10 +4,6 @@ node_js:
   - 0.12
   - 0.11
 
-install:
-  - npm install -g codecov istanbul
-
 script:
-  - istanbul cover mocha -- specs/
+  - istanbul cover npm test
   - codecov
-
