@@ -8,6 +8,6 @@ install:
   - npm install -g codecov istanbul
 
 script:
-  - istanbul cover ./node_modules/mocha/bin/_mocha -- specs
+  - istanbul cover mocha -- specs/
   - codecov
 
