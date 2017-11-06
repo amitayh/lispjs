@@ -1,4 +1,5 @@
-# lispjs [![Build Status](https://travis-ci.org/amitayh/lispjs.svg?branch=master)](https://travis-ci.org/amitayh/lispjs)
+# lispjs [![Build Status](https://travis-ci.org/amitayh/lispjs.svg?branch=master)](https://travis-ci.org/amitayh/lispjs) [![codecov](https://codecov.io/gh/amitayh/lispjs/branch/master/graph/badge.svg)](https://codecov.io/gh/amitayh/lispjs)
+
 
 Simple Lisp implementation in JavaScript. [Web REPL demo](http://amitayh.github.io/lispjs/)
 
